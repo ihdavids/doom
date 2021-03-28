@@ -48,3 +48,34 @@
 ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t)
+
+(package! emojify)
+(package! winum)
+(package! golden-ratio)
+(package! all-the-icons-ivy)
+(package! highlight-indent-guides)
+
+; Handy tools
+(package! ivy-todo)
+(package! beacon)
+(package! web-search)
+(package! deadgrep)
+;(package! rest-client)
+(package! ivy-explorer)
+;(package! ivy-lobster)
+
+(package! mu4e)
+;; modes
+(package! terraform-mode)
+(package! plantuml-mode)
+
+;; themese
+(package! nimbus-theme)
+
+;; weather
+(package! wttrin)
+
+(package! w3m)
+
+(package! powershell)
+(package! clang-format)

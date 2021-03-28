@@ -1,5 +1,5 @@
 #+TITLE: Config
-
+#+STARTUP: content
 * Base
 #+begin_src emacs-lisp
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
@@ -29,26 +29,29 @@ For termux we need a different init.el which I haven't solved yet.
 * Display DPI
 #+BEGIN_SRC emacs-lisp
 (setq dpi  (/ (display-pixel-width) (/ (display-mm-width) 25.4)))
-(setq k-high-dpi 200)
+(setq k-high-dpi 95)
 #+END_SRC
 
 * Core Settings
-#+begin_src emacs-lisp
+ Doom exposes five (optional) variables for controlling fonts in Doom. Here
+ are the three important ones:
 
-;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
-;; are the three important ones:
-;;
-;; + `doom-font'
-;; + `doom-variable-pitch-font'
-;; + `doom-big-font' -- used for `doom-big-font-mode'; use this for
-;;   presentations or streaming.
-;;
-;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
-;; font string. You generally only need these two:
+ + `doom-font'
+ + `doom-variable-pitch-font'
+ + `doom-big-font' -- used for `doom-big-font-mode'; use this for
+   presentations or streaming.
+
+ They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
+ font string. You generally only need these two:
+
+#+begin_src emacs-lisp
+(if (< dpi k-high-dpi)
+    (message "Low DPI")
+    (message "High DPI")
+)
 (if (< dpi k-high-dpi)
     (setq doom-font (font-spec :family "Fira Code" :size 18))
     (setq doom-font (font-spec :family "Fira Code" :size 26))
-
 )
 (if (< dpi k-high-dpi)
     (setq doom-variable-pitch-font (font-spec :family "sans" :size 18))
@@ -60,10 +63,6 @@ For termux we need a different init.el which I haven't solved yet.
 ;; `load-theme' function. This is the default:
 ;;(setq doom-theme 'doom-one)
 (setq doom-theme 'doom-palenight)
-
-;; If you use `org' and don't want your org files in the default location below,
-;; change `org-directory'. It must be set before org loads!
-(setq org-directory "/mnt/c/Users/ihdav/notes/")
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -86,9 +85,6 @@ For termux we need a different init.el which I haven't solved yet.
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
-(setq
-    org-superstar-headline-bullets-list '("⁖" "◉" "○" "✸" "✿")
-)
 #+end_src
 
 * Spaces Instead of Tabs
@@ -110,14 +106,69 @@ Alert comes from: I am not sure if I have this configured properly
   (setq alert-default-style 'notifications))
 #+end_src
 
+* Org Directory
+
+Set our org-mode directory path and gives us some quick search functionality for our notes directory
+If you use `org' and don't want your org files in the default location below,
+change `org-directory'. It must be set before org loads!
+
+#+begin_src emacs-lisp
+(setq org-directory "/mnt/c/Users/ihdav/notes/")
+(defun id/search-org-files ()
+  (interactive)
+  (counsel-rg "" org-directory nil "Search Notes: "))
+#+end_src
+
+* Org Bullets
+Org Mode Bullets Lists for Headings
+#+begin_src emacs-lisp
+(setq
+    org-superstar-headline-bullets-list '("⁖" "◉" "○" "✸" "✿")
+)
+#+end_src
+
+* Org Source Block Snippets
+
+This gives you the ability to add <sh to start a bash source block etc
+
+#+begin_src emacs-lisp
+(require 'org-tempo)
+(add-to-list 'org-structure-template-alist '("sh" . "src sh"))
+(add-to-list 'org-structure-template-alist '("ps" . "src powershell"))
+(add-to-list 'org-structure-template-alist '("cpp" . "src cpp"))
+(add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+(add-to-list 'org-structure-template-alist '("py" . "src python"))
+(add-to-list 'org-structure-template-alist '("json" . "src json"))
+#+end_src
+
+* Org Emphasis Markers
+
+This package makes it much easier to edit Org documents when org-hide-emphasis-markers is turned on. It temporarily shows the emphasis markers around certain markup elements when you place your cursor inside of them. No more fumbling around with = and * characters!
+
+I need to understand what this means!
+
+#+begin_src emacs-lisp
+;(setq org-hide-emphasis-markers t)
+;(use-package org-appear
+;  :hook (org-mode . org-appear-mode))
+#+end_src
+
+* Org Ellipsis
+#+begin_src emacs-lisp
+;;(setq org-ellipsis "⤵")
+(setq org-ellipsis " ▾")
+#+end_src
+
 * Org Fonts
 
 #+begin_src emacs-lisp
 ;; Replace list hyphen with dot
-;; (font-lock-add-keywords 'org-mode
-;;                         '(("^ *\\([-]\\) "
-;;                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
 (after! org
+
+
+(font-lock-add-keywords 'org-mode
+                         '(("^ *\\([-]\\) "
+                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
 ;; Increase the size of various headings
 (set-face-attribute 'org-document-title nil :font "Iosevka Aile" :weight 'bold :height 1.3)
 (dolist (face '((org-level-1 . 1.4)
@@ -143,7 +194,6 @@ Alert comes from: I am not sure if I have this configured properly
 (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
 (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
 (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
-(set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
 
 ;; Get rid of the background on column views
 (set-face-attribute 'org-column nil :background nil)
@@ -169,11 +219,15 @@ Alert comes from: I am not sure if I have this configured properly
         ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-window-center))
         ivy-posframe-height-alist '((t . 21))
         ivy-posframe-parameters '((internal-border-width . 1))
-        ivy-posframe-width 200)
+        ivy-posframe-width 200
+    )
+)
 #+END_SRC
 
 * EShell
 This binds Alt + r to a history popup using counsel.
+
+Also provide some aliases for eshell
 
 #+begin_src emacs-lisp
 (after! eshell
@@ -182,7 +236,17 @@ This binds Alt + r to a history popup using counsel.
               (eshell-cmpl-initialize)
               (define-key eshell-mode-map (kbd "M-r") 'counsel-esh-history)))
 )
-#+end_src
+
+;; emacs/eshell
+(after! eshell
+  (set-eshell-alias!
+   "f"   "(other-window 1) && find-file $1"
+   "l"   "ls -lh"
+   "d"   "dired $1"
+   "gl"  "(call-interactively 'magit-log-current)"
+   "gs"  "magit-status"
+   "gc"  "magit-commit"))
+#+END_SRC
 
 * RipGrep (Search Project)
 
@@ -211,7 +275,9 @@ Make the window somewhat transparent. I like this sometimes.
 ; Quick jump to anywhere in my buffer
 (map!
  (:leader
-   (:desc "Search" "d" #'avy-goto-char)))
+   (:desc "Search" "d" #'avy-goto-char)
+ )
+)
 #+END_SRC
 
 * Doom Modeline
@@ -219,4 +285,42 @@ At Roblox I have crazy big branch names, expand the VC segment of the modeline t
 #+BEGIN_SRC emacs-lisp
 (after! doom-modeline
   (setq doom-modeline-vcs-max-length 50))
+#+END_SRC
+
+
+* Golden Ratio
+Golden Ratio is a must have. I am a screen realty hog. The window I am in should be biggest
+ALWAYS!
+#+BEGIN_SRC emacs-lisp
+(use-package! golden-ratio
+  :after-call pre-command-hook
+  :config
+  ;(golden-ratio-mode +1)
+  ;; Using this hook for resizing windows is less precise than
+  ;; `doom-switch-window-hook'.
+  (remove-hook 'window-configuration-change-hook #'golden-ratio)
+  (add-hook 'doom-switch-window-hook #'golden-ratio))
+#+END_SRC
+
+* Clang Format
+#+BEGIN_SRC emacs-lisp
+(use-package! clang-format)
+
+(defun clang-format-buffer-smart ()
+  "Reformat buffer if .clang-format exists in the projectile root."
+  (interactive)
+  (when (f-exists? (expand-file-name ".clang-format" (projectile-project-root)))
+    (clang-format-buffer)))
+
+(defun clang-format-buffer-smart-on-save ()
+  "Add auto-save hook for clang-format-buffer-smart."
+  (add-hook 'before-save-hook 'clang-format-buffer-smart nil t))
+
+ (add-hook! 'c++-mode-hook 'clang-format-buffer-smart-on-save)
+ (add-hook! 'c-mode-hook 'clang-format-buffer-smart-on-save)
+#+END_SRC
+
+* Roblox Build Config
+#+BEGIN_SRC emacs-lisp
+(load! "roblox.el")
 #+END_SRC
