@@ -7,16 +7,33 @@
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
 
+
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
 (setq user-full-name "Ian Davids"
       user-mail-address "ian@algoriststudios.com")
 #+end_src
 
-* Core Settings
+* Platform Helper Macro Loading
+These helper macros let me detect if we are running on Termux or windows or mac.
+For termux we need a different init.el which I haven't solved yet.
+
 #+begin_src emacs-lisp
 (setq id/is-termux
       (string-suffix-p "Android" (string-trim (shell-command-to-string "uname -a"))))
+
+;; Platform helper macros
+(load! "helpers.el")
+#+end_src
+
+* Display DPI
+#+BEGIN_SRC emacs-lisp
+(setq dpi  (/ (display-pixel-width) (/ (display-mm-width) 25.4)))
+(setq k-high-dpi 200)
+#+END_SRC
+
+* Core Settings
+#+begin_src emacs-lisp
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
 ;; are the three important ones:
@@ -28,8 +45,15 @@
 ;;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
- (setq doom-font (font-spec :family "Fira Code" :size 28 :weight 'semi-light)
-       doom-variable-pitch-font (font-spec :family "sans" :size 13))
+(if (< dpi k-high-dpi)
+    (setq doom-font (font-spec :family "Fira Code" :size 18))
+    (setq doom-font (font-spec :family "Fira Code" :size 26))
+
+)
+(if (< dpi k-high-dpi)
+    (setq doom-variable-pitch-font (font-spec :family "sans" :size 18))
+    (setq doom-variable-pitch-font (font-spec :family "sans" :size 26))
+)
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
@@ -43,7 +67,7 @@
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
-(setq display-line-numbers-type t)
+(setq display-line-numbers-type 'relative)
 
 
 ;; Here are some additional functions/macros that could help you configure Doom:
@@ -96,7 +120,7 @@ Alert comes from: I am not sure if I have this configured properly
 (after! org
 ;; Increase the size of various headings
 (set-face-attribute 'org-document-title nil :font "Iosevka Aile" :weight 'bold :height 1.3)
-(dolist (face '((org-level-1 . 1.3)
+(dolist (face '((org-level-1 . 1.4)
                 (org-level-2 . 1.2)
                 (org-level-3 . 1.05)
                 (org-level-4 . 1.0)
@@ -119,6 +143,7 @@ Alert comes from: I am not sure if I have this configured properly
 (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
 (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
 (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+(set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
 
 ;; Get rid of the background on column views
 (set-face-attribute 'org-column nil :background nil)
@@ -126,7 +151,6 @@ Alert comes from: I am not sure if I have this configured properly
 
 ;; TODO: Others to consider
 ;; '(org-document-info-keyword ((t (:inherit (shadow fixed-pitch)))))
-;; '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
 ;; '(org-property-value ((t (:inherit fixed-pitch))) t)
 ;; '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
 ;; '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
@@ -134,3 +158,65 @@ Alert comes from: I am not sure if I have this configured properly
 ;; '(org-verbatim ((t (:inherit (shadow fixed-pitch))))))
 )
 #+end_src
+
+* Ivy PosFrame
+#+BEGIN_SRC emacs-lisp
+(after! ivy-posframe
+  ;; Causes open buffers and recentf to be combined in ivy-switch-buffer
+  (setq ivy-use-virtual-buffers t
+        counsel-find-file-at-point t
+        ivy-wrap nil
+        ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-window-center))
+        ivy-posframe-height-alist '((t . 21))
+        ivy-posframe-parameters '((internal-border-width . 1))
+        ivy-posframe-width 200)
+#+END_SRC
+
+* EShell
+This binds Alt + r to a history popup using counsel.
+
+#+begin_src emacs-lisp
+(after! eshell
+  (add-hook 'eshell-mode-hook
+            (lambda ()
+              (eshell-cmpl-initialize)
+              (define-key eshell-mode-map (kbd "M-r") 'counsel-esh-history)))
+)
+#+end_src
+
+* RipGrep (Search Project)
+
+This is a windows only thing, I will remove this now that I am running in WSL.
+On windows this rg project command would fail due to slashes.
+
+#+BEGIN_SRC emacs-lisp
+;; On windows I get errors because of slashes
+(after! counsel
+  (with-windows
+    (setq counsel-rg-base-command '("rg" "-M" "240" "--with-filename" "--no-heading" "--line-number" "--color" "never" "%s" "--path-separator" "\\" "."))
+  )
+)
+#+END_SRC
+
+* Transparency
+Make the window somewhat transparent. I like this sometimes.
+
+#+BEGIN_SRC emacs-lisp
+(set-frame-parameter (selected-frame) 'alpha '(100 . 95))
+(add-to-list 'default-frame-alist '(alpha . (100 . 95)))
+#+END_SRC
+
+* Keybinds
+#+BEGIN_SRC emacs-lisp
+; Quick jump to anywhere in my buffer
+(map!
+ (:leader
+   (:desc "Search" "d" #'avy-goto-char)))
+#+END_SRC
+
+* Doom Modeline
+At Roblox I have crazy big branch names, expand the VC segment of the modeline to reflect that:
+#+BEGIN_SRC emacs-lisp
+(after! doom-modeline
+  (setq doom-modeline-vcs-max-length 50))
+#+END_SRC
