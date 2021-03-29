@@ -320,6 +320,16 @@ ALWAYS!
  (add-hook! 'c-mode-hook 'clang-format-buffer-smart-on-save)
 #+END_SRC
 
+* LSP Clang Arguments
+
+You can use --query-driver=path/mygcc
+
+#+begin_src emacs-lisp
+(setq lsp-clients-clangd-args '("-log=verbose" "-background-index=1"))
+#(setq lsp-clients-clangd-executable "")
+#+end_src
+
+
 * Platform Specific Build Config
 #+BEGIN_SRC emacs-lisp
 (load! "platform-specific.el")
