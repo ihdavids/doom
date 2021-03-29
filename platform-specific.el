@@ -1,5 +1,9 @@
 ;;; platform-specific.el -*- lexical-binding: t; -*-
 
+
+(setq org-directory "~/git/notes/")
+
+
 ; NoOpt build of the SV
 (defun bno ()
   (interactive)

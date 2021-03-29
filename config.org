@@ -326,11 +326,17 @@ You can use --query-driver=path/mygcc
 
 #+begin_src emacs-lisp
 (setq lsp-clients-clangd-args '("-log=verbose" "-background-index=1"))
-#(setq lsp-clients-clangd-executable "")
+;;(setq lsp-clients-clangd-executable "")
 #+end_src
 
 
 * Platform Specific Build Config
+
+I often find I have platform specific things that I want to override but only on a specific
+machine. This lets me do just that.
+
 #+BEGIN_SRC emacs-lisp
-(load! "platform-specific.el")
+(setq platform-specific-filename "platform-specific.el")
+(if (file-exists-p platform-specific-filename)
+    (load! platform-specific-filename))
 #+END_SRC
