@@ -1,20 +1,20 @@
-;;; roblox.el -*- lexical-binding: t; -*-
+;;; platform-specific.el -*- lexical-binding: t; -*-
 
-; NoOpt build of the rcc
+; NoOpt build of the SV
 (defun bno ()
   (interactive)
   (progn
     (cd (concat (projectile-project-root) "build/ninja"))
-    (message "[Building the RCC NoOpt]")
+    (message "[Building the SV NoOpt]")
     (compile "ninja -C rcc\\vs2017\\x64\\noopt")
 ))
 
-; Release build of the rcc
+; Release build of the SV
 (defun bnr ()
   (interactive)
   (progn
     (cd (concat (projectile-project-root) "build/ninja"))
-    (message "[Building the RCC Release]")
+    (message "[Building the SV Release]")
     (compile "ninja -C rcc\\vs2017\\x64\\release")
 ))
 
@@ -48,10 +48,10 @@
     (compile "ninja -C client\\vs2017\\x64\\noopt")
 ))
 
-(defun bstudio ()
+(defun bstd ()
   (interactive)
   (progn
     (cd (concat (projectile-project-root) "build/ninja"))
-    (message "[Building the Studio NoOpt]")
+    (message "[Building the Std NoOpt]")
     (compile "ninja -C studio\\vs2017\\x64\\noopt")
 ))
